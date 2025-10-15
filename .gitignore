@@ -1,0 +1,21 @@
+# Python files
+__pycache__/
+*.pyc
+
+# Docker logs / temporary files
+*.log
+docker-compose.override.yml
+
+# Grafana database and exported files
+data/grafana/grafana.db
+data/grafana/png/
+data/grafana/csv/
+data/grafana/pdf/
+
+# Prometheus and Loki data directories
+data/prometheus/
+data/loki/
+
+# Other OS files
+.DS_Store
+
