@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   app:
     build: .
@@ -7,9 +5,11 @@ services:
       - "5000:5000"
     networks:
       - monitoring
+    volumes:
+      - ./webapp.log:/app/webapp.log
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
@@ -18,12 +18,39 @@ services:
       - monitoring
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:latest
+    user: "472" # grafana user inside container
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
     ports:
       - "3000:3000"
     networks:
       - monitoring
 
+  loki:
+    image: grafana/loki:2.8.0
+    volumes:
+      - ./loki-config.yml:/etc/loki/loki-config.yml
+      - /tmp/loki:/tmp/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:2.8.0
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/promtail-config.yml
+      - ./webapp.log:/app/webapp.log
+      - /tmp/promtail-positions.yaml:/tmp/promtail-positions.yaml
+    networks:
+      - monitoring
+
 networks:
   monitoring:
+
+volumes:
+  grafana-data:
 
