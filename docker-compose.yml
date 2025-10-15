@@ -1,28 +1,70 @@
-version: '3'
 
 services:
   app:
     build: .
+    container_name: my_app
     ports:
       - "5000:5000"
     networks:
       - monitoring
+    depends_on:
+      - prometheus
+      - loki
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.45.3
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./data/prometheus:/prometheus
     ports:
       - "9090:9090"
     networks:
       - monitoring
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:12.1.1
+    container_name: grafana
     ports:
       - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./data/grafana:/var/lib/grafana
     networks:
       - monitoring
+    depends_on:
+      - prometheus
+      - loki
+
+  loki:
+    image: grafana/loki:2.8.0
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+      - ./data/loki:/loki
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:2.8.0
+    container_name: promtail
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - ./data/promtail:/tmp
+    networks:
+      - monitoring
+    depends_on:
+      - loki
 
 networks:
   monitoring:
