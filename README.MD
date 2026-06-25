@@ -5,6 +5,7 @@ A simple example demonstrating how to monitor a Flask application using Promethe
 ## Commands
 ```bash
 docker-compose up --build
+```
 
 ## Learnings
 Through this project, I gained hands-on experience with application monitoring and observability using Flask, Prometheus, and Grafana. I learned how to containerize services with Docker Compose, expose 
